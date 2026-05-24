@@ -63,12 +63,19 @@ def github_upload(filename, content, message):
     # Check if file exists
     url = f'https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}'
     sha = None
+    file_exists = False
     try:
         resp = requests.get(url, headers=headers, timeout=30)
         if resp.status_code == 200:
             sha = resp.json().get('sha')
-    except:
-        pass
+            file_exists = True
+            log(f"  Ficheiro existe, SHA: {sha[:10]}...")
+        elif resp.status_code == 404:
+            log(f"  Ficheiro novo, a criar...")
+        else:
+            log(f"  GET status: {resp.status_code}, a tentar criar/atualizar...")
+    except Exception as e:
+        log(f"  Erro no GET: {e}, a tentar criar...")
     
     # Upload
     b64_content = base64.b64encode(content.encode('utf-8')).decode('utf-8')
@@ -77,7 +84,7 @@ def github_upload(filename, content, message):
         'content': b64_content,
         'branch': 'main'
     }
-    if sha:
+    if file_exists and sha:
         body['sha'] = sha
     
     try:
