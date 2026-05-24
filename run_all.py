@@ -12,6 +12,16 @@ import base64
 import subprocess
 from datetime import datetime, timezone
 
+# Carregar .env automaticamente se existir
+ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+if os.path.exists(ENV_PATH):
+    with open(ENV_PATH, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, value = line.split('=', 1)
+                os.environ.setdefault(key.strip(), value.strip())
+
 # ConfiguraÃ§Ãµes
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN') or os.getenv('PERSONAL_ACCESS_TOKEN')
 GITHUB_REPO = os.getenv('GITHUB_REPO', 'aimidas1/Polymarket_price_markets')
